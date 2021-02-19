@@ -69,10 +69,10 @@ impl Perform for CreateComment {
       let parent =
         match blocking(context.pool(), move |conn| Comment::read(&conn, parent_id)).await? {
           Ok(comment) => comment,
-          Err(_e) => return Err(APIError::err("couldnt_create_comment").into()),
+          Err(_e) => return Err(APIError::err("couldnt_find_parent_comment").into()),
         };
       if parent.post_id != post_id {
-        return Err(APIError::err("couldnt_create_comment").into());
+        return Err(APIError::err("parent_comment_not_in_post").into());
       }
     }
 
