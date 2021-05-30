@@ -180,9 +180,12 @@ pub(crate) fn captcha_as_wav_base64(captcha: &Captcha) -> String {
 mod tests {
   use lemmy_api_common::check_validator_time;
   use lemmy_db_queries::{establish_unpooled_connection, source::local_user::LocalUser_, Crud};
-  use lemmy_db_schema::source::{
-    local_user::{LocalUser, LocalUserForm},
-    person::{Person, PersonForm},
+  use lemmy_db_schema::{
+    source::{
+      local_user::{LocalUser, LocalUserForm},
+      person::{Person, PersonForm},
+    },
+    PrimaryLanguageTag,
   };
   use lemmy_utils::claims::Claims;
 
@@ -200,6 +203,7 @@ mod tests {
     let local_user_form = LocalUserForm {
       person_id: inserted_person.id,
       password_encrypted: "123456".to_string(),
+      discussion_languages: Some(vec![PrimaryLanguageTag("en".to_string())]),
       ..LocalUserForm::default()
     };
 

@@ -74,12 +74,15 @@ impl PersonMention_ for PersonMention {
 #[cfg(test)]
 mod tests {
   use crate::{establish_unpooled_connection, Crud};
-  use lemmy_db_schema::source::{
-    comment::*,
-    community::{Community, CommunityForm},
-    person::*,
-    person_mention::*,
-    post::*,
+  use lemmy_db_schema::{
+    source::{
+      comment::*,
+      community::{Community, CommunityForm},
+      person::*,
+      person_mention::*,
+      post::*,
+    },
+    PrimaryLanguageTag,
   };
   use serial_test::serial;
 
@@ -114,6 +117,7 @@ mod tests {
       name: "A test post".into(),
       creator_id: inserted_person.id,
       community_id: inserted_community.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PostForm::default()
     };
 
@@ -123,6 +127,7 @@ mod tests {
       content: "A test comment".into(),
       creator_id: inserted_person.id,
       post_id: inserted_post.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..CommentForm::default()
     };
 

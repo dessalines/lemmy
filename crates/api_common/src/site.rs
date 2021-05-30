@@ -1,4 +1,4 @@
-use lemmy_db_schema::{CommunityId, PersonId};
+use lemmy_db_schema::{CommunityId, PersonId, PrimaryLanguageTag};
 use lemmy_db_views::{
   comment_view::CommentView,
   local_user_view::LocalUserSettingsView,
@@ -88,6 +88,7 @@ pub struct EditSite {
   pub open_registration: Option<bool>,
   pub enable_nsfw: Option<bool>,
   pub community_creation_admin_only: Option<bool>,
+  pub languages: Vec<PrimaryLanguageTag>,
   pub auth: String,
 }
 
@@ -139,4 +140,12 @@ pub struct FederatedInstances {
   pub linked: Vec<String>,
   pub allowed: Option<Vec<String>>,
   pub blocked: Option<Vec<String>>,
+}
+
+#[derive(Deserialize)]
+pub struct GetLanguages {}
+
+#[derive(Serialize, Clone)]
+pub struct LanguagesResponse {
+  pub languages: Vec<PrimaryLanguageTag>,
 }

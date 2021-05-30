@@ -1,5 +1,5 @@
 use crate::{
-  extensions::context::lemmy_context,
+  extensions::{context::lemmy_context, note_extension::NoteExtension},
   fetcher::objects::{get_or_fetch_and_insert_comment, get_or_fetch_and_insert_post},
   get_community_from_to_or_cc,
   objects::{
@@ -21,6 +21,7 @@ use activitystreams::{
   prelude::*,
   public,
 };
+use activitystreams_ext::Ext1;
 use anyhow::{anyhow, Context};
 use lemmy_api_common::blocking;
 use lemmy_db_queries::{Crud, DbPool};
@@ -83,7 +84,8 @@ impl ToApub for Comment {
       comment.set_updated(convert_datetime(u));
     }
 
-    Ok(comment)
+    let ext = NoteExtension::new(self.language.to_owned())?;
+    Ok(Ext1::new(comment, ext))
   }
 
   fn to_tombstone(&self) -> Result<Tombstone, LemmyError> {
@@ -207,6 +209,7 @@ impl FromApubToForm<NoteExt> for CommentForm {
       deleted: None,
       ap_id,
       local: Some(false),
+      language: note.ext_one.language.to_owned(),
     })
   }
 }

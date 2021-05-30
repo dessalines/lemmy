@@ -34,6 +34,7 @@ use lemmy_db_schema::{
   CommunityId,
   PersonId,
   PostId,
+  PrimaryLanguageTag,
 };
 use serde::Serialize;
 
@@ -184,6 +185,7 @@ pub struct CommentQueryBuilder<'a> {
   saved_only: Option<bool>,
   unread_only: Option<bool>,
   show_bot_accounts: Option<bool>,
+  languages: Option<Vec<PrimaryLanguageTag>>,
   page: Option<i64>,
   limit: Option<i64>,
 }
@@ -204,6 +206,7 @@ impl<'a> CommentQueryBuilder<'a> {
       saved_only: None,
       unread_only: None,
       show_bot_accounts: None,
+      languages: None,
       page: None,
       limit: None,
     }
@@ -266,6 +269,11 @@ impl<'a> CommentQueryBuilder<'a> {
 
   pub fn show_bot_accounts<T: MaybeOptional<bool>>(mut self, show_bot_accounts: T) -> Self {
     self.show_bot_accounts = show_bot_accounts.get_optional();
+    self
+  }
+
+  pub fn languages<T: MaybeOptional<Vec<PrimaryLanguageTag>>>(mut self, languages: T) -> Self {
+    self.languages = languages.get_optional();
     self
   }
 
@@ -392,6 +400,10 @@ impl<'a> CommentQueryBuilder<'a> {
       query = query.filter(person::bot_account.eq(false));
     };
 
+    if let Some(languages) = self.languages {
+      query = query.filter(comment::language.eq(any(languages)))
+    }
+
     query = match self.sort.unwrap_or(SortType::New) {
       SortType::Hot | SortType::Active => query
         .order_by(hot_rank(comment_aggregates::score, comment_aggregates::published).desc())
@@ -456,7 +468,10 @@ mod tests {
     Crud,
     Likeable,
   };
-  use lemmy_db_schema::source::{comment::*, community::*, person::*, post::*};
+  use lemmy_db_schema::{
+    source::{comment::*, community::*, person::*, post::*},
+    PrimaryLanguageTag,
+  };
   use serial_test::serial;
 
   #[test]
@@ -483,6 +498,7 @@ mod tests {
       name: "A test post 2".into(),
       creator_id: inserted_person.id,
       community_id: inserted_community.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PostForm::default()
     };
 
@@ -492,6 +508,7 @@ mod tests {
       content: "A test comment 32".into(),
       creator_id: inserted_person.id,
       post_id: inserted_post.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..CommentForm::default()
     };
 
@@ -526,6 +543,7 @@ mod tests {
         ap_id: inserted_comment.ap_id,
         updated: None,
         local: true,
+        language: PrimaryLanguageTag("en".to_string()),
       },
       creator: PersonSafe {
         id: inserted_person.id,
@@ -567,6 +585,7 @@ mod tests {
         thumbnail_url: None,
         ap_id: inserted_post.ap_id.to_owned(),
         local: true,
+        language: PrimaryLanguageTag("en".to_string()),
       },
       community: CommunitySafe {
         id: inserted_community.id,

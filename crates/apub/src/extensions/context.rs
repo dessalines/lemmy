@@ -10,7 +10,7 @@ pub fn lemmy_context() -> Result<Vec<AnyBase>, LemmyError> {
     "sensitive": "as:sensitive",
     "stickied": "as:stickied",
     "pt": "https://join.lemmy.ml#",
-    "comments_enabled": {
+    "commentsEnabled": {
       "type": "sc:Boolean",
       "id": "pt:commentsEnabled"
     },
@@ -18,6 +18,9 @@ pub fn lemmy_context() -> Result<Vec<AnyBase>, LemmyError> {
     "matrixUserId": {
       "type": "sc:Text",
       "id": "as:alsoKnownAs"
+    },
+    "languages": {
+      "type": "sc:Text"
     },
   }))?;
   Ok(vec![

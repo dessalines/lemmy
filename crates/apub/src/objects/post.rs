@@ -88,11 +88,12 @@ impl ToApub for Post {
       page.set_updated(convert_datetime(u));
     }
 
-    let ext = PageExtension {
-      comments_enabled: Some(!self.locked),
-      sensitive: Some(self.nsfw),
-      stickied: Some(self.stickied),
-    };
+    let ext = PageExtension::new(
+      !self.locked,
+      self.nsfw,
+      self.stickied,
+      self.language.to_owned(),
+    )?;
     Ok(Ext1::new(page, ext))
   }
 
@@ -238,6 +239,7 @@ impl FromApubToForm<PageExt> for PostForm {
       thumbnail_url: pictrs_thumbnail.map(|u| u.into()),
       ap_id: Some(ap_id),
       local: Some(false),
+      language: ext.language.to_owned(),
     })
   }
 }

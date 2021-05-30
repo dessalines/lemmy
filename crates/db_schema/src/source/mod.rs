@@ -2,6 +2,7 @@ pub mod activity;
 pub mod comment;
 pub mod comment_report;
 pub mod community;
+pub mod languages;
 pub mod local_user;
 pub mod moderator;
 pub mod password_reset_request;

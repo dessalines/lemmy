@@ -48,3 +48,4 @@ anyhow = "1.0.38"
 thiserror = "1.0.23"
 background-jobs = "0.8.0"
 reqwest = { version = "0.10.10", features = ["json"] }
+language-tags = "0.3.0"

@@ -9,48 +9,31 @@ use serde::{Deserialize, Serialize};
 /// `sensitive` (called 'nsfw') and `stickied`.
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PageExtension {
-  pub comments_enabled: Option<bool>,
-  pub sensitive: Option<bool>,
-  pub stickied: Option<bool>,
+pub struct NoteExtension {
   pub language: Option<PrimaryLanguageTag>,
 }
 
-impl PageExtension {
-  pub fn new(
-    comments_enabled: bool,
-    sensitive: bool,
-    stickied: bool,
-    language: PrimaryLanguageTag,
-  ) -> Result<PageExtension, LemmyError> {
-    Ok(PageExtension {
-      comments_enabled: Some(comments_enabled),
-      sensitive: Some(sensitive),
-      stickied: Some(stickied),
+impl NoteExtension {
+  pub fn new(language: PrimaryLanguageTag) -> Result<NoteExtension, LemmyError> {
+    Ok(NoteExtension {
       language: Some(language),
     })
   }
 }
 
-impl<U> UnparsedExtension<U> for PageExtension
+impl<U> UnparsedExtension<U> for NoteExtension
 where
   U: UnparsedMutExt,
 {
   type Error = serde_json::Error;
 
   fn try_from_unparsed(unparsed_mut: &mut U) -> Result<Self, Self::Error> {
-    Ok(PageExtension {
-      comments_enabled: unparsed_mut.remove("commentsEnabled")?,
-      sensitive: unparsed_mut.remove("sensitive")?,
-      stickied: unparsed_mut.remove("stickied")?,
+    Ok(NoteExtension {
       language: unparsed_mut.remove("language")?,
     })
   }
 
   fn try_into_unparsed(self, unparsed_mut: &mut U) -> Result<(), Self::Error> {
-    unparsed_mut.insert("commentsEnabled", self.comments_enabled)?;
-    unparsed_mut.insert("sensitive", self.sensitive)?;
-    unparsed_mut.insert("stickied", self.stickied)?;
     unparsed_mut.insert("language", self.language)?;
     Ok(())
   }

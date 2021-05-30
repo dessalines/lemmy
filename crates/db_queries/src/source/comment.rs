@@ -231,11 +231,14 @@ impl Saveable<CommentSavedForm> for CommentSaved {
 #[cfg(test)]
 mod tests {
   use crate::{establish_unpooled_connection, Crud, Likeable, Saveable};
-  use lemmy_db_schema::source::{
-    comment::*,
-    community::{Community, CommunityForm},
-    person::{Person, PersonForm},
-    post::*,
+  use lemmy_db_schema::{
+    source::{
+      comment::*,
+      community::{Community, CommunityForm},
+      person::{Person, PersonForm},
+      post::*,
+    },
+    PrimaryLanguageTag,
   };
   use serial_test::serial;
 
@@ -263,6 +266,7 @@ mod tests {
       name: "A test post".into(),
       creator_id: inserted_person.id,
       community_id: inserted_community.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PostForm::default()
     };
 
@@ -272,6 +276,7 @@ mod tests {
       content: "A test comment".into(),
       creator_id: inserted_person.id,
       post_id: inserted_post.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..CommentForm::default()
     };
 
@@ -290,6 +295,7 @@ mod tests {
       updated: None,
       ap_id: inserted_comment.ap_id.to_owned(),
       local: true,
+      language: PrimaryLanguageTag("en".to_string()),
     };
 
     let child_comment_form = CommentForm {
@@ -297,6 +303,7 @@ mod tests {
       creator_id: inserted_person.id,
       post_id: inserted_post.id,
       parent_id: Some(inserted_comment.id),
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..CommentForm::default()
     };
 

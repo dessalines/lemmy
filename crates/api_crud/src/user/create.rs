@@ -127,11 +127,12 @@ impl PerformCrud for Register {
       theme: Some("browser".into()),
       default_sort_type: Some(SortType::Active as i16),
       default_listing_type: Some(ListingType::Subscribed as i16),
-      lang: Some("browser".into()),
+      interface_language: Some("browser".into()),
       show_avatars: Some(true),
       show_scores: Some(true),
       show_read_posts: Some(true),
       send_notifications_to_email: Some(false),
+      discussion_languages: Some(data.discussion_languages.to_owned()),
     };
 
     let inserted_local_user = match blocking(context.pool(), move |conn| {

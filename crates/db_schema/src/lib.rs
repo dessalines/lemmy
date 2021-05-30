@@ -11,8 +11,10 @@ use diesel::{
   serialize::{Output, ToSql},
   sql_types::Text,
 };
+use language_tags::{LanguageTag, ValidationError};
 use serde::{Deserialize, Serialize};
 use std::{
+  convert::TryFrom,
   fmt,
   fmt::{Display, Formatter},
   io::Write,
@@ -118,4 +120,17 @@ impl From<Url> for DbUrl {
 // TODO: can probably move this back to lemmy_db_queries
 pub fn naive_now() -> NaiveDateTime {
   chrono::prelude::Utc::now().naive_utc()
+}
+
+#[repr(transparent)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, DieselNewType)]
+pub struct PrimaryLanguageTag(pub String);
+
+impl TryFrom<LanguageTag> for PrimaryLanguageTag {
+  type Error = ValidationError;
+
+  fn try_from(tag: LanguageTag) -> Result<Self, Self::Error> {
+    let canonical = tag.canonicalize()?;
+    Ok(PrimaryLanguageTag(canonical.primary_language().to_string()))
+  }
 }

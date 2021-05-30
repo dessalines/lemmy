@@ -21,7 +21,8 @@ pub fn config(cfg: &mut web::ServiceConfig, rate_limit: &RateLimit) {
           .route("", web::put().to(route_post_crud::<EditSite>))
           .route("/transfer", web::post().to(route_post::<TransferSite>))
           .route("/config", web::get().to(route_get::<GetSiteConfig>))
-          .route("/config", web::put().to(route_post::<SaveSiteConfig>)),
+          .route("/config", web::put().to(route_post::<SaveSiteConfig>))
+          .route("/languages", web::get().to(route_get_crud::<GetLanguages>)),
       )
       .service(
         web::resource("/modlog")

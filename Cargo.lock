@@ -122,7 +122,7 @@ dependencies = [
  "httparse",
  "indexmap",
  "itoa",
- "language-tags",
+ "language-tags 0.2.2",
  "lazy_static",
  "log",
  "mime",
@@ -1568,7 +1568,7 @@ dependencies = [
  "http",
  "httparse",
  "httpdate",
- "language-tags",
+ "language-tags 0.2.2",
  "mime",
  "percent-encoding",
  "unicase",
@@ -1720,6 +1720,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a91d884b6667cd606bb5a69aa0c99ba811a115fc68915e7056ec08a46e93199a"
 
 [[package]]
+name = "language-tags"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c3b2cac4f8e25c09c46826144a8b6e78520351824c247eff1a69a2aa6ebab26"
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1745,6 +1751,7 @@ dependencies = [
  "http",
  "http-signature-normalization-actix",
  "itertools",
+ "language-tags 0.3.0",
  "lazy_static",
  "lemmy_api_common",
  "lemmy_apub",
@@ -1932,6 +1939,7 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel_migrations",
+ "language-tags 0.3.0",
  "lazy_static",
  "lemmy_db_schema",
  "lemmy_utils",
@@ -1953,6 +1961,7 @@ dependencies = [
  "chrono",
  "diesel",
  "diesel-derive-newtype",
+ "language-tags 0.3.0",
  "log",
  "serde",
  "serde_json",
@@ -1964,6 +1973,7 @@ name = "lemmy_db_views"
 version = "0.1.0"
 dependencies = [
  "diesel",
+ "language-tags 0.3.0",
  "lemmy_db_queries",
  "lemmy_db_schema",
  "log",

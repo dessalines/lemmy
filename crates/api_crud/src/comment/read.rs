@@ -21,6 +21,9 @@ impl PerformCrud for GetComments {
     let show_bot_accounts = local_user_view
       .as_ref()
       .map(|t| t.local_user.show_bot_accounts);
+    let languages = local_user_view
+      .as_ref()
+      .map(|l| l.local_user.discussion_languages.clone());
     let person_id = local_user_view.map(|u| u.person.id);
 
     let sort: Option<SortType> = from_opt_str_to_opt_enum(&data.sort);
@@ -40,6 +43,7 @@ impl PerformCrud for GetComments {
         .community_name(community_name)
         .my_person_id(person_id)
         .show_bot_accounts(show_bot_accounts)
+        .languages(languages)
         .page(page)
         .limit(limit)
         .list()

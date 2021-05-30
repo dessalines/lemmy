@@ -140,7 +140,10 @@ impl PrivateMessage_ for PrivateMessage {
 #[cfg(test)]
 mod tests {
   use crate::{establish_unpooled_connection, source::private_message::PrivateMessage_, Crud};
-  use lemmy_db_schema::source::{person::*, private_message::*};
+  use lemmy_db_schema::{
+    source::{person::*, private_message::*},
+    PrimaryLanguageTag,
+  };
   use serial_test::serial;
 
   #[test]
@@ -166,6 +169,7 @@ mod tests {
       content: "A test private message".into(),
       creator_id: inserted_creator.id,
       recipient_id: inserted_recipient.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PrivateMessageForm::default()
     };
 
@@ -182,6 +186,7 @@ mod tests {
       published: inserted_private_message.published,
       ap_id: inserted_private_message.ap_id.to_owned(),
       local: true,
+      language: PrimaryLanguageTag("en".to_string()),
     };
 
     let read_private_message = PrivateMessage::read(&conn, inserted_private_message.id).unwrap();

@@ -14,3 +14,4 @@ serde_json = { version = "1.0.61", features = ["preserve_order"] }
 log = "0.4.14"
 url = { version = "2.2.1", features = ["serde"] }
 diesel-derive-newtype = "0.1"
+language-tags = "0.3.0"

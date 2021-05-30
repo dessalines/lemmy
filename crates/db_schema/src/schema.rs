@@ -24,6 +24,7 @@ table! {
         deleted -> Bool,
         ap_id -> Varchar,
         local -> Bool,
+        language -> Text,
     }
 }
 
@@ -149,12 +150,13 @@ table! {
         theme -> Varchar,
         default_sort_type -> Int2,
         default_listing_type -> Int2,
-        lang -> Varchar,
+        interface_language -> Varchar,
         show_avatars -> Bool,
         send_notifications_to_email -> Bool,
         validator_time -> Timestamp,
         show_bot_accounts -> Bool,
         show_scores -> Bool,
+        discussion_languages -> Array<Text>,
         show_read_posts -> Bool,
     }
 }
@@ -343,6 +345,7 @@ table! {
         thumbnail_url -> Nullable<Text>,
         ap_id -> Varchar,
         local -> Bool,
+        language -> Text,
     }
 }
 
@@ -417,6 +420,7 @@ table! {
         updated -> Nullable<Timestamp>,
         ap_id -> Varchar,
         local -> Bool,
+        language -> Text,
     }
 }
 
@@ -521,6 +525,14 @@ table! {
     }
 }
 
+table! {
+    user_languages (id) {
+        id -> Int4,
+        local_user_id -> Int4,
+        language -> Text,
+    }
+}
+
 joinable!(comment_alias_1 -> person_alias_1 (creator_id));
 joinable!(comment -> comment_alias_1 (parent_id));
 joinable!(person_mention -> person_alias_1 (recipient_id));
@@ -576,6 +588,7 @@ joinable!(post_saved -> person (person_id));
 joinable!(post_saved -> post (post_id));
 joinable!(site -> person (creator_id));
 joinable!(site_aggregates -> site (site_id));
+joinable!(user_languages -> local_user (local_user_id));
 
 allow_tables_to_appear_in_same_query!(
   activity,
@@ -589,6 +602,7 @@ allow_tables_to_appear_in_same_query!(
   community_follower,
   community_moderator,
   community_person_ban,
+  user_languages,
   local_user,
   mod_add,
   mod_add_community,

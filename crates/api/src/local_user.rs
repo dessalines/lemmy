@@ -238,10 +238,11 @@ impl Perform for SaveUserSettings {
       theme: data.theme.to_owned(),
       default_sort_type,
       default_listing_type,
-      lang: data.lang.to_owned(),
+      interface_language: data.interface_language.to_owned(),
       show_avatars: data.show_avatars,
       show_read_posts: data.show_read_posts,
       send_notifications_to_email: data.send_notifications_to_email,
+      discussion_languages: data.discussion_languages.to_owned(),
     };
 
     let local_user_res = blocking(context.pool(), move |conn| {

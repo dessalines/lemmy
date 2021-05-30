@@ -1,5 +1,5 @@
 use crate::{
-  extensions::context::lemmy_context,
+  extensions::{context::lemmy_context, note_extension::NoteExtension},
   fetcher::person::get_or_fetch_and_upsert_person,
   objects::{
     check_object_domain,
@@ -17,6 +17,7 @@ use activitystreams::{
   object::{kind::NoteType, ApObject, Note, Tombstone},
   prelude::*,
 };
+use activitystreams_ext::Ext1;
 use anyhow::Context;
 use lemmy_api_common::blocking;
 use lemmy_db_queries::{Crud, DbPool};
@@ -54,7 +55,8 @@ impl ToApub for PrivateMessage {
       private_message.set_updated(convert_datetime(u));
     }
 
-    Ok(private_message)
+    let ext = NoteExtension::new(self.language.to_owned())?;
+    Ok(Ext1::new(private_message, ext))
   }
 
   fn to_tombstone(&self) -> Result<Tombstone, LemmyError> {
@@ -129,6 +131,7 @@ impl FromApubToForm<NoteExt> for PrivateMessageForm {
       read: None,
       ap_id,
       local: Some(false),
+      language: note.ext_one.language.to_owned(),
     })
   }
 }

@@ -7,6 +7,7 @@ use lemmy_api_common::{
   person::Register,
   site::*,
 };
+use lemmy_db_schema::PrimaryLanguageTag;
 use lemmy_db_views::site_view::SiteView;
 use lemmy_db_views_actor::person_view::PersonViewSafe;
 use lemmy_utils::{settings::structs::Settings, version, ConnectionId, LemmyError};
@@ -37,6 +38,7 @@ impl PerformCrud for GetSite {
             show_nsfw: true,
             captcha_uuid: None,
             captcha_answer: None,
+            discussion_languages: vec![],
           };
           let login_response = register.perform(context, websocket_id).await?;
           info!("Admin {} created", setup.admin_username);
@@ -95,5 +97,24 @@ impl PerformCrud for GetSite {
       my_user,
       federated_instances,
     })
+  }
+}
+
+#[async_trait::async_trait(?Send)]
+impl PerformCrud for GetLanguages {
+  type Response = LanguagesResponse;
+
+  async fn perform(
+    &self,
+    _context: &Data<LemmyContext>,
+    _websocket_id: Option<ConnectionId>,
+  ) -> Result<LanguagesResponse, LemmyError> {
+    // TODO: get an actual language list
+    // https://github.com/pyfisch/rust-language-tags/issues/32
+    let languages = vec!["en", "es"]
+      .iter()
+      .map(|l| PrimaryLanguageTag(l.to_string()))
+      .collect();
+    Ok(LanguagesResponse { languages })
   }
 }

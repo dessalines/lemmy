@@ -30,6 +30,7 @@ use lemmy_db_schema::{
   CommunityId,
   PersonId,
   PostId,
+  PrimaryLanguageTag,
 };
 use log::debug;
 use serde::Serialize;
@@ -169,6 +170,7 @@ pub struct PostQueryBuilder<'a> {
   saved_only: Option<bool>,
   page: Option<i64>,
   limit: Option<i64>,
+  languages: Option<Vec<PrimaryLanguageTag>>,
 }
 
 impl<'a> PostQueryBuilder<'a> {
@@ -189,6 +191,7 @@ impl<'a> PostQueryBuilder<'a> {
       saved_only: None,
       page: None,
       limit: None,
+      languages: None,
     }
   }
 
@@ -259,6 +262,11 @@ impl<'a> PostQueryBuilder<'a> {
 
   pub fn limit<T: MaybeOptional<i64>>(mut self, limit: T) -> Self {
     self.limit = limit.get_optional();
+    self
+  }
+
+  pub fn languages<T: MaybeOptional<Vec<PrimaryLanguageTag>>>(mut self, languages: T) -> Self {
+    self.languages = languages.get_optional();
     self
   }
 
@@ -377,6 +385,10 @@ impl<'a> PostQueryBuilder<'a> {
       query = query.filter(post_saved::id.is_not_null());
     };
 
+    if let Some(languages) = self.languages {
+      query = query.filter(post::language.eq_any(languages.into_iter()));
+    };
+
     query = match self.sort.unwrap_or(SortType::Hot) {
       SortType::Active => query
         .then_order_by(
@@ -457,7 +469,10 @@ mod tests {
     ListingType,
     SortType,
   };
-  use lemmy_db_schema::source::{community::*, person::*, post::*};
+  use lemmy_db_schema::{
+    source::{community::*, person::*, post::*},
+    PrimaryLanguageTag,
+  };
   use serial_test::serial;
 
   #[test]
@@ -497,6 +512,7 @@ mod tests {
       name: post_name.to_owned(),
       creator_id: inserted_person.id,
       community_id: inserted_community.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PostForm::default()
     };
 
@@ -506,6 +522,7 @@ mod tests {
       name: bot_post_name,
       creator_id: inserted_bot.id,
       community_id: inserted_community.id,
+      language: Some(PrimaryLanguageTag("en".to_string())),
       ..PostForm::default()
     };
 
@@ -571,6 +588,7 @@ mod tests {
         thumbnail_url: None,
         ap_id: inserted_post.ap_id.to_owned(),
         local: true,
+        language: PrimaryLanguageTag("en".to_string()),
       },
       my_vote: None,
       creator: PersonSafe {

@@ -10,6 +10,7 @@ pub mod objects;
 use crate::{
   extensions::{
     group_extension::GroupExtension,
+    note_extension::NoteExtension,
     page_extension::PageExtension,
     person_extension::PersonExtension,
     signatures::{PublicKey, PublicKeyExtension},
@@ -54,7 +55,7 @@ type PersonExt =
   Ext2<actor::ApActor<ApObject<actor::Actor<UserTypes>>>, PersonExtension, PublicKeyExtension>;
 /// Activitystreams type for post
 pub type PageExt = Ext1<ApObject<Page>, PageExtension>;
-pub type NoteExt = ApObject<Note>;
+pub type NoteExt = Ext1<ApObject<Note>, NoteExtension>;
 
 #[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize, PartialEq)]
 pub enum UserTypes {

@@ -9,6 +9,7 @@ pub struct CreateComment {
   pub parent_id: Option<CommentId>,
   pub form_id: Option<String>,
   pub auth: String,
+  pub language: String,
 }
 
 #[derive(Deserialize)]
@@ -17,6 +18,7 @@ pub struct EditComment {
   pub comment_id: CommentId,
   pub form_id: Option<String>,
   pub auth: String,
+  pub language: String,
 }
 
 #[derive(Deserialize)]

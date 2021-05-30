@@ -1,4 +1,4 @@
-use crate::{schema::private_message, DbUrl, PersonId, PrivateMessageId};
+use crate::{schema::private_message, DbUrl, PersonId, PrimaryLanguageTag, PrivateMessageId};
 use serde::Serialize;
 
 #[derive(Clone, Queryable, Associations, Identifiable, PartialEq, Debug, Serialize)]
@@ -14,6 +14,7 @@ pub struct PrivateMessage {
   pub updated: Option<chrono::NaiveDateTime>,
   pub ap_id: DbUrl,
   pub local: bool,
+  pub language: PrimaryLanguageTag,
 }
 
 #[derive(Insertable, AsChangeset, Default)]
@@ -28,4 +29,5 @@ pub struct PrivateMessageForm {
   pub updated: Option<chrono::NaiveDateTime>,
   pub ap_id: Option<DbUrl>,
   pub local: Option<bool>,
+  pub language: Option<PrimaryLanguageTag>,
 }

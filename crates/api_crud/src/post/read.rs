@@ -113,6 +113,7 @@ impl PerformCrud for GetPosts {
     let community_id = data.community_id;
     let community_name = data.community_name.to_owned();
     let saved_only = data.saved_only;
+    let languages = local_user_view.map(|l| l.local_user.discussion_languages);
 
     let posts = blocking(context.pool(), move |conn| {
       PostQueryBuilder::create(conn)
@@ -127,6 +128,7 @@ impl PerformCrud for GetPosts {
         .my_person_id(person_id)
         .page(page)
         .limit(limit)
+        .languages(languages)
         .list()
     })
     .await?

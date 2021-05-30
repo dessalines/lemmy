@@ -5,6 +5,7 @@ use crate::{
   DbUrl,
   PersonId,
   PostId,
+  PrimaryLanguageTag,
 };
 use serde::Serialize;
 
@@ -31,6 +32,7 @@ pub struct Comment {
   pub deleted: bool,
   pub ap_id: DbUrl,
   pub local: bool,
+  pub language: PrimaryLanguageTag,
 }
 
 #[derive(Clone, Queryable, Associations, Identifiable, PartialEq, Debug, Serialize)]
@@ -65,6 +67,7 @@ pub struct CommentForm {
   pub deleted: Option<bool>,
   pub ap_id: Option<DbUrl>,
   pub local: Option<bool>,
+  pub language: Option<PrimaryLanguageTag>,
 }
 
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug, Clone)]
