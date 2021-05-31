@@ -1,6 +1,8 @@
 {
-  # for more info about the config, check out the documentation
+  # For more info about the config, check out the documentation
   # https://join.lemmy.ml/docs/en/administration/configuration.html
+  #
+  # Do not change this file on the server, as rerunning Ansible will overwrite it
 
   # settings related to the postgresql database
   database: {

@@ -83,12 +83,11 @@
         pictshare_port: "8537"
         iframely_port: "8538"
 
-    - name:  add config file (only during initial setup)
+    - name:  add config file
       template:
         src: 'templates/config.hjson'
         dest: '{{lemmy_base_dir}}/lemmy.hjson'
         mode: '0600'
-        force: false
         owner: '1000'
         group: '1000'
     vars:
