@@ -87,6 +87,15 @@ pub trait Bannable<Form> {
     Self: Sized;
 }
 
+pub trait Blockable<Form> {
+  fn block(conn: &PgConnection, form: &Form) -> Result<Self, Error>
+  where
+    Self: Sized;
+  fn unblock(conn: &PgConnection, form: &Form) -> Result<usize, Error>
+  where
+    Self: Sized;
+}
+
 pub trait Saveable<Form> {
   fn save(conn: &PgConnection, form: &Form) -> Result<Self, Error>
   where

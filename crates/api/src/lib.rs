@@ -39,8 +39,14 @@ pub async fn match_websocket_operation(
     UserOperation::GetReplies => do_websocket_operation::<GetReplies>(context, id, op, data).await,
     UserOperation::AddAdmin => do_websocket_operation::<AddAdmin>(context, id, op, data).await,
     UserOperation::BanPerson => do_websocket_operation::<BanPerson>(context, id, op, data).await,
+    UserOperation::BlockPerson => {
+      do_websocket_operation::<BlockPerson>(context, id, op, data).await
+    }
     UserOperation::GetPersonMentions => {
       do_websocket_operation::<GetPersonMentions>(context, id, op, data).await
+    }
+    UserOperation::GetBlockedPersons => {
+      do_websocket_operation::<GetBlockedPersons>(context, id, op, data).await
     }
     UserOperation::MarkPersonMentionAsRead => {
       do_websocket_operation::<MarkPersonMentionAsRead>(context, id, op, data).await
@@ -95,8 +101,14 @@ pub async fn match_websocket_operation(
     UserOperation::FollowCommunity => {
       do_websocket_operation::<FollowCommunity>(context, id, op, data).await
     }
+    UserOperation::BlockCommunity => {
+      do_websocket_operation::<BlockCommunity>(context, id, op, data).await
+    }
     UserOperation::GetFollowedCommunities => {
       do_websocket_operation::<GetFollowedCommunities>(context, id, op, data).await
+    }
+    UserOperation::GetBlockedCommunities => {
+      do_websocket_operation::<GetBlockedCommunities>(context, id, op, data).await
     }
     UserOperation::BanFromCommunity => {
       do_websocket_operation::<BanFromCommunity>(context, id, op, data).await

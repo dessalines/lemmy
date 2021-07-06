@@ -453,6 +453,24 @@ table! {
     }
 }
 
+table! {
+    person_block (id) {
+        id -> Int4,
+        person_id -> Int4,
+        recipient_id -> Int4,
+        published -> Timestamp,
+    }
+}
+
+table! {
+    community_block (id) {
+        id -> Int4,
+        person_id -> Int4,
+        community_id -> Int4,
+        published -> Timestamp,
+    }
+}
+
 // These are necessary since diesel doesn't have self joins / aliases
 table! {
     comment_alias_1 (id) {
@@ -530,6 +548,9 @@ joinable!(comment -> person_alias_1 (creator_id));
 joinable!(post_report -> person_alias_2 (resolver_id));
 joinable!(comment_report -> person_alias_2 (resolver_id));
 
+joinable!(person_block -> person (person_id));
+joinable!(person_block -> person_alias_1 (recipient_id));
+
 joinable!(comment -> person (creator_id));
 joinable!(comment -> post (post_id));
 joinable!(comment_aggregates -> comment (comment_id));
@@ -540,6 +561,8 @@ joinable!(comment_report -> comment (comment_id));
 joinable!(comment_saved -> comment (comment_id));
 joinable!(comment_saved -> person (person_id));
 joinable!(community_aggregates -> community (community_id));
+joinable!(community_block -> community (community_id));
+joinable!(community_block -> person (person_id));
 joinable!(community_follower -> community (community_id));
 joinable!(community_follower -> person (person_id));
 joinable!(community_moderator -> community (community_id));
@@ -581,6 +604,7 @@ allow_tables_to_appear_in_same_query!(
   activity,
   comment,
   comment_aggregates,
+  community_block,
   comment_like,
   comment_report,
   comment_saved,
@@ -603,6 +627,7 @@ allow_tables_to_appear_in_same_query!(
   person,
   person_aggregates,
   person_ban,
+  person_block,
   person_mention,
   post,
   post_aggregates,

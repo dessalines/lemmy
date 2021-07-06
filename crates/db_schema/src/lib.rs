@@ -67,6 +67,12 @@ impl fmt::Display for PrivateMessageId {
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, DieselNewType)]
 pub struct PersonMentionId(i32);
 
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, DieselNewType)]
+pub struct PersonBlockId(i32);
+
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, DieselNewType)]
+pub struct CommunityBlockId(i32);
+
 #[repr(transparent)]
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug, AsExpression, FromSqlRow)]
 #[sql_type = "Text"]

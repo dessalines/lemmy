@@ -10,6 +10,7 @@ use diesel::PgConnection;
 use lemmy_db_queries::{
   source::{
     community::{CommunityModerator_, Community_},
+    person_block::PersonBlock_,
     site::Site_,
   },
   Crud,
@@ -21,6 +22,7 @@ use lemmy_db_schema::{
     comment::Comment,
     community::{Community, CommunityModerator},
     person::Person,
+    person_block::PersonBlock,
     person_mention::{PersonMention, PersonMentionForm},
     post::{Post, PostRead, PostReadForm},
     site::Site,
@@ -343,6 +345,20 @@ pub async fn check_community_ban(
     move |conn: &'_ _| CommunityPersonBanView::get(conn, person_id, community_id).is_ok();
   if blocking(pool, is_banned).await? {
     Err(ApiError::err("community_ban").into())
+  } else {
+    Ok(())
+  }
+}
+
+pub async fn check_person_block(
+  person_id: PersonId,
+  recipient_id: PersonId,
+  pool: &DbPool,
+) -> Result<(), LemmyError> {
+  // TODO the person and recipient might be reversed
+  let is_blocked = move |conn: &'_ _| PersonBlock::read(conn, person_id, recipient_id).is_ok();
+  if blocking(pool, is_blocked).await? {
+    Err(ApiError::err("person_block").into())
   } else {
     Ok(())
   }

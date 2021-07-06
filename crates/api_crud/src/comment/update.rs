@@ -37,6 +37,7 @@ impl PerformCrud for EditComment {
     })
     .await??;
 
+    // TODO is this necessary? It should really only need to check on create
     check_community_ban(
       local_user_view.person.id,
       orig_comment.community.id,

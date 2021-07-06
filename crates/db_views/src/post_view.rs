@@ -13,9 +13,11 @@ use lemmy_db_queries::{
 use lemmy_db_schema::{
   schema::{
     community,
+    community_block,
     community_follower,
     community_person_ban,
     person,
+    person_block,
     post,
     post_aggregates,
     post_like,
@@ -25,6 +27,7 @@ use lemmy_db_schema::{
   source::{
     community::{Community, CommunityFollower, CommunityPersonBan, CommunitySafe},
     person::{Person, PersonSafe},
+    person_block::PersonBlock,
     post::{Post, PostRead, PostSaved},
   },
   CommunityId,
@@ -41,10 +44,11 @@ pub struct PostView {
   pub community: CommunitySafe,
   pub creator_banned_from_community: bool, // Left Join to CommunityPersonBan
   pub counts: PostAggregates,
-  pub subscribed: bool,     // Left join to CommunityFollower
-  pub saved: bool,          // Left join to PostSaved
-  pub read: bool,           // Left join to PostRead
-  pub my_vote: Option<i16>, // Left join to PostLike
+  pub subscribed: bool,      // Left join to CommunityFollower
+  pub saved: bool,           // Left join to PostSaved
+  pub read: bool,            // Left join to PostRead
+  pub creator_blocked: bool, // Left join to PersonBlock
+  pub my_vote: Option<i16>,  // Left join to PostLike
 }
 
 type PostViewTuple = (
@@ -56,6 +60,7 @@ type PostViewTuple = (
   Option<CommunityFollower>,
   Option<PostSaved>,
   Option<PostRead>,
+  Option<PersonBlock>,
   Option<i16>,
 );
 
@@ -77,6 +82,7 @@ impl PostView {
       follower,
       saved,
       read,
+      creator_blocked,
       post_like,
     ) = post::table
       .find(post_id)
@@ -112,6 +118,13 @@ impl PostView {
         ),
       )
       .left_join(
+        person_block::table.on(
+          post::creator_id
+            .eq(person_block::person_id)
+            .and(person_block::recipient_id.eq(person_id_join)),
+        ),
+      )
+      .left_join(
         post_like::table.on(
           post::id
             .eq(post_like::post_id)
@@ -127,6 +140,7 @@ impl PostView {
         community_follower::all_columns.nullable(),
         post_saved::all_columns.nullable(),
         post_read::all_columns.nullable(),
+        person_block::all_columns.nullable(),
         post_like::score.nullable(),
       ))
       .first::<PostViewTuple>(conn)?;
@@ -148,6 +162,7 @@ impl PostView {
       subscribed: follower.is_some(),
       saved: saved.is_some(),
       read: read.is_some(),
+      creator_blocked: creator_blocked.is_some(),
       my_vote,
     })
   }
@@ -301,6 +316,20 @@ impl<'a> PostQueryBuilder<'a> {
         ),
       )
       .left_join(
+        person_block::table.on(
+          post::creator_id
+            .eq(person_block::recipient_id)
+            .and(person_block::person_id.eq(person_id_join)),
+        ),
+      )
+      .left_join(
+        community_block::table.on(
+          community::id
+            .eq(community_block::community_id)
+            .and(community_block::person_id.eq(person_id_join)),
+        ),
+      )
+      .left_join(
         post_like::table.on(
           post::id
             .eq(post_like::post_id)
@@ -316,6 +345,7 @@ impl<'a> PostQueryBuilder<'a> {
         community_follower::all_columns.nullable(),
         post_saved::all_columns.nullable(),
         post_read::all_columns.nullable(),
+        person_block::all_columns.nullable(),
         post_like::score.nullable(),
       ))
       .into_boxed();
@@ -376,6 +406,12 @@ impl<'a> PostQueryBuilder<'a> {
     if self.saved_only.unwrap_or(false) {
       query = query.filter(post_saved::id.is_not_null());
     };
+
+    // Don't show blocked communities or persons
+    if self.my_person_id.is_some() {
+      query = query.filter(community_block::person_id.is_null());
+      query = query.filter(person_block::person_id.is_null());
+    }
 
     query = match self.sort.unwrap_or(SortType::Hot) {
       SortType::Active => query
@@ -440,7 +476,8 @@ impl ViewToVec for PostView {
         subscribed: a.5.is_some(),
         saved: a.6.is_some(),
         read: a.7.is_some(),
-        my_vote: a.8,
+        creator_blocked: a.8.is_some(),
+        my_vote: a.9,
       })
       .collect::<Vec<Self>>()
   }
@@ -452,12 +489,19 @@ mod tests {
   use lemmy_db_queries::{
     aggregates::post_aggregates::PostAggregates,
     establish_unpooled_connection,
+    Blockable,
     Crud,
     Likeable,
     ListingType,
     SortType,
   };
-  use lemmy_db_schema::source::{community::*, person::*, post::*};
+  use lemmy_db_schema::source::{
+    community::*,
+    community_block::{CommunityBlock, CommunityBlockForm},
+    person::*,
+    person_block::{PersonBlock, PersonBlockForm},
+    post::*,
+  };
   use serial_test::serial;
 
   #[test]
@@ -493,6 +537,32 @@ mod tests {
 
     let inserted_community = Community::create(&conn, &new_community).unwrap();
 
+    // Test a person block, make sure the post query doesn't include their post
+    let blocked_person = PersonForm {
+      name: person_name.to_owned(),
+      ..PersonForm::default()
+    };
+
+    let inserted_blocked_person = Person::create(&conn, &blocked_person).unwrap();
+
+    let post_from_blocked_person = PostForm {
+      name: "blocked_person_post".to_string(),
+      creator_id: inserted_blocked_person.id,
+      community_id: inserted_community.id,
+      ..PostForm::default()
+    };
+
+    Post::create(&conn, &post_from_blocked_person).unwrap();
+
+    // block that person
+    let person_block = PersonBlockForm {
+      person_id: inserted_person.id,
+      recipient_id: inserted_blocked_person.id,
+    };
+
+    PersonBlock::block(&conn, &person_block).unwrap();
+
+    // A sample post
     let new_post = PostForm {
       name: post_name.to_owned(),
       creator_id: inserted_person.id,
@@ -623,7 +693,24 @@ mod tests {
       subscribed: false,
       read: false,
       saved: false,
+      creator_blocked: false,
     };
+
+    // Test a community block
+    let community_block = CommunityBlockForm {
+      person_id: inserted_person.id,
+      community_id: inserted_community.id,
+    };
+    CommunityBlock::block(&conn, &community_block).unwrap();
+
+    let read_post_listings_with_person_after_block = PostQueryBuilder::create(&conn)
+      .listing_type(ListingType::Community)
+      .sort(SortType::New)
+      .show_bot_accounts(false)
+      .community_id(inserted_community.id)
+      .my_person_id(inserted_person.id)
+      .list()
+      .unwrap();
 
     // TODO More needs to be added here
     let mut expected_post_listing_with_user = expected_post_listing_no_person.to_owned();
@@ -631,9 +718,12 @@ mod tests {
 
     let like_removed = PostLike::remove(&conn, inserted_person.id, inserted_post.id).unwrap();
     let num_deleted = Post::delete(&conn, inserted_post.id).unwrap();
+    PersonBlock::unblock(&conn, &person_block).unwrap();
+    CommunityBlock::unblock(&conn, &community_block).unwrap();
     Community::delete(&conn, inserted_community.id).unwrap();
     Person::delete(&conn, inserted_person.id).unwrap();
     Person::delete(&conn, inserted_bot.id).unwrap();
+    Person::delete(&conn, inserted_blocked_person.id).unwrap();
 
     // The with user
     assert_eq!(
@@ -645,7 +735,7 @@ mod tests {
       read_post_listing_with_person
     );
 
-    // Should be only one person, IE the bot post should be missing
+    // Should be only one person, IE the bot post, and blocked should be missing
     assert_eq!(1, read_post_listings_with_person.len());
 
     // Without the user
@@ -655,8 +745,11 @@ mod tests {
     );
     assert_eq!(expected_post_listing_no_person, read_post_listing_no_person);
 
-    // Should be 2 posts, with the bot post
-    assert_eq!(2, read_post_listings_no_person.len());
+    // Should be 2 posts, with the bot post, and the blocked
+    assert_eq!(3, read_post_listings_no_person.len());
+
+    // Should be 0 posts after the community block
+    assert_eq!(0, read_post_listings_with_person_after_block.len());
 
     assert_eq!(expected_post_like, inserted_post_like);
     assert_eq!(1, like_removed);

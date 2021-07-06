@@ -5,8 +5,10 @@ use lemmy_db_queries::{from_opt_str_to_opt_enum, source::person::Person_, SortTy
 use lemmy_db_schema::source::person::*;
 use lemmy_db_views::{comment_view::CommentQueryBuilder, post_view::PostQueryBuilder};
 use lemmy_db_views_actor::{
+  community_block_view::CommunityBlockView,
   community_follower_view::CommunityFollowerView,
   community_moderator_view::CommunityModeratorView,
+  person_block_view::PersonBlockView,
   person_view::PersonViewSafe,
 };
 use lemmy_utils::{ApiError, ConnectionId, LemmyError};
@@ -101,14 +103,27 @@ impl PerformCrud for GetPersonDetails {
     .await??;
 
     let mut follows = vec![];
+    let mut person_blocks = vec![];
+    let mut community_blocks = vec![];
+
+    // Only show the followers and blocks for that user
     if let Some(pid) = person_id {
       if pid == person_details_id {
         follows = blocking(context.pool(), move |conn| {
           CommunityFollowerView::for_person(conn, person_details_id)
         })
         .await??;
+        person_blocks = blocking(context.pool(), move |conn| {
+          PersonBlockView::for_person(conn, person_details_id)
+        })
+        .await??;
+        community_blocks = blocking(context.pool(), move |conn| {
+          CommunityBlockView::for_person(conn, person_details_id)
+        })
+        .await??;
       }
     };
+
     let moderates = blocking(context.pool(), move |conn| {
       CommunityModeratorView::for_person(conn, person_details_id)
     })
@@ -118,6 +133,8 @@ impl PerformCrud for GetPersonDetails {
     Ok(GetPersonDetailsResponse {
       person_view,
       follows,
+      community_blocks,
+      person_blocks,
       moderates,
       comments,
       posts,

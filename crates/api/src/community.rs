@@ -12,6 +12,7 @@ use lemmy_apub::{ActorType, CommunityType, UserType};
 use lemmy_db_queries::{
   source::{comment::Comment_, community::CommunityModerator_, post::Post_},
   Bannable,
+  Blockable,
   Crud,
   Followable,
   Joinable,
@@ -19,6 +20,7 @@ use lemmy_db_queries::{
 use lemmy_db_schema::source::{
   comment::Comment,
   community::*,
+  community_block::{CommunityBlock, CommunityBlockForm},
   moderator::*,
   person::Person,
   post::Post,
@@ -102,6 +104,48 @@ impl Perform for FollowCommunity {
     if !community.local {
       community_view.subscribed = data.follow;
     }
+
+    Ok(CommunityResponse { community_view })
+  }
+}
+
+#[async_trait::async_trait(?Send)]
+impl Perform for BlockCommunity {
+  type Response = CommunityResponse;
+
+  async fn perform(
+    &self,
+    context: &Data<LemmyContext>,
+    _websocket_id: Option<ConnectionId>,
+  ) -> Result<CommunityResponse, LemmyError> {
+    let data: &BlockCommunity = &self;
+    let local_user_view = get_local_user_view_from_jwt(&data.auth, context.pool()).await?;
+
+    let community_id = data.community_id;
+    let person_id = local_user_view.person.id;
+    let community_block_form = CommunityBlockForm {
+      person_id,
+      community_id,
+    };
+
+    if data.block {
+      let block = move |conn: &'_ _| CommunityBlock::block(conn, &community_block_form);
+      if blocking(context.pool(), block).await?.is_err() {
+        return Err(ApiError::err("community_block_already_exists").into());
+      }
+    } else {
+      let unblock = move |conn: &'_ _| CommunityBlock::unblock(conn, &community_block_form);
+      if blocking(context.pool(), unblock).await?.is_err() {
+        return Err(ApiError::err("community_block_already_exists").into());
+      }
+    }
+
+    // TODO does any federated stuff need to be done here?
+
+    let community_view = blocking(context.pool(), move |conn| {
+      CommunityView::read(conn, community_id, Some(person_id))
+    })
+    .await??;
 
     Ok(CommunityResponse { community_view })
   }

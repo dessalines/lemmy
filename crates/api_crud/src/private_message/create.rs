@@ -2,6 +2,7 @@ use crate::PerformCrud;
 use actix_web::web::Data;
 use lemmy_api_common::{
   blocking,
+  check_person_block,
   get_local_user_view_from_jwt,
   person::{CreatePrivateMessage, PrivateMessageResponse},
   send_email_to_user,
@@ -26,6 +27,8 @@ impl PerformCrud for CreatePrivateMessage {
     let local_user_view = get_local_user_view_from_jwt(&data.auth, context.pool()).await?;
 
     let content_slurs_removed = remove_slurs(&data.content.to_owned());
+
+    check_person_block(local_user_view.person.id, data.recipient_id, context.pool()).await?;
 
     let private_message_form = PrivateMessageForm {
       content: content_slurs_removed.to_owned(),

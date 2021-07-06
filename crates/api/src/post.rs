@@ -4,6 +4,7 @@ use lemmy_api_common::{
   blocking,
   check_community_ban,
   check_downvotes_enabled,
+  check_person_block,
   get_local_user_view_from_jwt,
   is_mod_or_admin,
   mark_post_as_read,
@@ -36,6 +37,8 @@ impl Perform for CreatePostLike {
     let post = blocking(context.pool(), move |conn| Post::read(conn, post_id)).await??;
 
     check_community_ban(local_user_view.person.id, post.community_id, context.pool()).await?;
+
+    check_person_block(local_user_view.person.id, post.creator_id, context.pool()).await?;
 
     let like_form = PostLikeForm {
       post_id: data.post_id,

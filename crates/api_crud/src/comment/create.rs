@@ -3,6 +3,7 @@ use actix_web::web::Data;
 use lemmy_api_common::{
   blocking,
   check_community_ban,
+  check_person_block,
   comment::*,
   get_local_user_view_from_jwt,
   get_post,
@@ -40,6 +41,8 @@ impl PerformCrud for CreateComment {
 
     check_community_ban(local_user_view.person.id, post.community_id, context.pool()).await?;
 
+    check_person_block(local_user_view.person.id, post.creator_id, context.pool()).await?;
+
     // Check if post is locked, no new comments
     if post.locked {
       return Err(ApiError::err("locked").into());
@@ -51,6 +54,10 @@ impl PerformCrud for CreateComment {
       let parent = blocking(context.pool(), move |conn| Comment::read(conn, parent_id))
         .await?
         .map_err(|_| ApiError::err("couldnt_create_comment"))?;
+
+      check_person_block(local_user_view.person.id, parent.creator_id, context.pool()).await?;
+
+      // Strange issue where sometimes the post ID is incorrect
       if parent.post_id != post_id {
         return Err(ApiError::err("couldnt_create_comment").into());
       }
