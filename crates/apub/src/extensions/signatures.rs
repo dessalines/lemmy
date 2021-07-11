@@ -1,12 +1,11 @@
-use crate::ActorType;
 use activitystreams::unparsed::UnparsedMutExt;
 use activitystreams_ext::UnparsedExtension;
 use actix_web::HttpRequest;
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use http::{header::HeaderName, HeaderMap, HeaderValue};
 use http_signature_normalization_actix::Config as ConfigActix;
 use http_signature_normalization_reqwest::prelude::{Config, SignExt};
-use lemmy_utils::{location_info, LemmyError};
+use lemmy_utils::LemmyError;
 use log::debug;
 use openssl::{
   hash::MessageDigest,
@@ -65,8 +64,7 @@ pub(crate) async fn sign_and_send(
 }
 
 /// Verifies the HTTP signature on an incoming inbox request.
-pub fn verify_signature(request: &HttpRequest, actor: &dyn ActorType) -> Result<(), LemmyError> {
-  let public_key = actor.public_key().context(location_info!())?;
+pub fn verify_signature(request: &HttpRequest, public_key: &str) -> Result<(), LemmyError> {
   let verified = CONFIG2
     .begin_verify(
       request.method(),

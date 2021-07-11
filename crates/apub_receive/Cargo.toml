@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 lemmy_utils = { path = "../utils" }
+lemmy_apub_lib = { path = "../apub_lib" }
 lemmy_apub = { path = "../apub" }
 lemmy_db_queries = { path = "../db_queries" }
 lemmy_db_schema = { path = "../db_schema" }

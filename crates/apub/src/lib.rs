@@ -52,6 +52,7 @@ pub type GroupExt =
 /// Activitystreams type for person
 type PersonExt =
   Ext2<actor::ApActor<ApObject<actor::Actor<UserTypes>>>, PersonExtension, PublicKeyExtension>;
+pub type SiteExt = actor::ApActor<ApObject<actor::Service>>;
 /// Activitystreams type for post
 pub type PageExt = Ext1<ApObject<Page>, PageExtension>;
 pub type NoteExt = ApObject<Note>;
@@ -170,10 +171,10 @@ pub trait ApubLikeableType {
 
 /// Common methods provided by ActivityPub actors (community and person). Not all methods are
 /// implemented by all actors.
-#[async_trait::async_trait(?Send)]
 pub trait ActorType {
   fn is_local(&self) -> bool;
   fn actor_id(&self) -> Url;
+  fn name(&self) -> String;
 
   // TODO: every actor should have a public key, so this shouldnt be an option (needs to be fixed in db)
   fn public_key(&self) -> Option<String>;

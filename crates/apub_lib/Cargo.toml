@@ -1,0 +1,14 @@
+[package]
+name = "lemmy_apub_lib"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+lemmy_utils = { path = "../utils" }
+lemmy_websocket = { path = "../websocket" }
+lemmy_apub_lib_derive = { path = "../apub_lib_derive" }
+activitystreams = "0.7.0-alpha.11"
+activitystreams-ext = "0.1.0-alpha.2"
+serde = { version = "1.0.123", features = ["derive"] }
+async-trait = "0.1.42"
+url = { version = "2.2.1", features = ["serde"] }

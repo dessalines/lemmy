@@ -989,6 +989,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
+name = "dissimilar"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc4b29f4b9bb94bf267d57269fd0706d343a160937108e9619fe380645428abb"
+
+[[package]]
 name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1260,6 +1266,12 @@ name = "gimli"
 version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e4075386626662786ddb0ec9081e7c7eeb1ba31951f447ca780ef9f5d568189"
+
+[[package]]
+name = "glob"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 
 [[package]]
 name = "h2"
@@ -1737,6 +1749,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "lemmy_apub_lib"
+version = "0.1.0"
+dependencies = [
+ "activitystreams",
+ "activitystreams-ext",
+ "async-trait",
+ "lemmy_apub_lib_derive",
+ "lemmy_utils",
+ "lemmy_websocket",
+ "serde",
+ "url",
+]
+
+[[package]]
+name = "lemmy_apub_lib_derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2 1.0.27",
+ "quote 1.0.9",
+ "syn 1.0.73",
+ "trybuild",
+]
+
+[[package]]
 name = "lemmy_apub_receive"
 version = "0.1.0"
 dependencies = [
@@ -1760,6 +1796,7 @@ dependencies = [
  "itertools",
  "lemmy_api_common",
  "lemmy_apub",
+ "lemmy_apub_lib",
  "lemmy_db_queries",
  "lemmy_db_schema",
  "lemmy_db_views",
@@ -3362,6 +3399,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "tower-service"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3392,6 +3438,21 @@ name = "try-lock"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
+
+[[package]]
+name = "trybuild"
+version = "1.0.42"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1768998d9a3b179411618e377dbb134c58a88cda284b0aa71c42c40660127d46"
+dependencies = [
+ "dissimilar",
+ "glob",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "termcolor",
+ "toml",
+]
 
 [[package]]
 name = "twoway"

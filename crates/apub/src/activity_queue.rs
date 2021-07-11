@@ -49,7 +49,7 @@ where
   if check_is_apub_id_valid(&inbox, false).is_ok() {
     debug!(
       "Sending activity {:?} to {}",
-      &activity.id_unchecked(),
+      &activity.id_unchecked().map(ToString::to_string),
       &inbox
     );
     send_activity_internal(context, activity, creator, vec![inbox], true, true).await?;
@@ -88,7 +88,7 @@ where
   .collect();
   debug!(
     "Sending activity {:?} to followers of {}",
-    &activity.id_unchecked().map(|i| i.to_string()),
+    &activity.id_unchecked().map(ToString::to_string),
     &community.actor_id
   );
 
@@ -127,7 +127,7 @@ where
     check_is_apub_id_valid(&inbox, false)?;
     debug!(
       "Sending activity {:?} to community {}",
-      &activity.id_unchecked(),
+      &activity.id_unchecked().map(ToString::to_string),
       &community.actor_id
     );
     // dont send to object_actor here, as that is responsibility of the community itself

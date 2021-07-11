@@ -24,13 +24,15 @@ use lemmy_utils::LemmyError;
 use lemmy_websocket::LemmyContext;
 use url::Url;
 
-#[async_trait::async_trait(?Send)]
 impl ActorType for Person {
   fn is_local(&self) -> bool {
     self.local
   }
   fn actor_id(&self) -> Url {
     self.actor_id.to_owned().into_inner()
+  }
+  fn name(&self) -> String {
+    self.name.clone()
   }
 
   fn public_key(&self) -> Option<String> {
